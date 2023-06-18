@@ -1,174 +1,508 @@
 #include <bits/stdc++.h>
-#include <windows.h>
+#define LOCAL
+#ifdef LOCAL
 #include <conio.h>
+#include <windows.h>
+#endif // LOCAL
+#define Up (72)
+#define Down (80)
+#define Left (75)
+#define Right (77)
+#define KeyDown(VK_NONAME) ((GetAsyncKeyState(VK_NONAME)&0x8000)?1:0)
+#define CPP_11 false
+#define CLS; clsAll();
+
 using namespace std;
+typedef HANDLE handle;
+typedef clock_t tick;
+const int TickPerSec=CLOCKS_PER_SEC;
+const int Columns_x=80,Lines_y=25;
 
-class Player
+void clsAll();
+void color(int =15);
+void gotoxy(int,int);
+void hideCursor();
+void printWithDelay(string,int =50);
+void printInCenter(string,int =0);
+
+class RandNumGenerator
 {
 private:
-    string name;
-    int hp;
-    int hp_maximum;
-    int bread;
-    int emerald;
-    /*
-        已测试，正常。v0.1
-    */
 
 public:
-    void Set(int hpt,int breadt,int emeraldt);
-    void Test();
-    bool Lose_Bread(int x);
-    bool Lose_Emerald(int x);
-    bool Lose_Hp(int x);
-    void Gain_Bread(int x);
-    void Gain_Emerald(int x);
-    void Gain_Hp(int x);
+    bool test_();
+    int getRandom(int,int);
+    int getRandom(int =10);
+    vector<int> getRandomArrayUnique(int =1,int =100,int =10);
+    vector<int> getRandomArray(int =1,int =100,int =10,bool =false);
 };
-
-class Event
+int RandNumGenerator::getRandom(int n)
 {
-private:
+    return rand()%(n+1);
+}
+int RandNumGenerator::getRandom(int l,int r)
+{
+    return rand()%(r-l+1)+l;
+}
+vector<int> RandNumGenerator::getRandomArray(int l,int r,int n,bool _unique)
+{
+    vector<int>q;
+    if(!_unique)
+    {
+        for(int i=1;i<=n;i++)
+        {
+            q.push_back(getRandom(l,r));
+        }
+        return q;
+    }
+    else
+    {
+        return getRandomArrayUnique(l,r,n);
+    }
+//    vector<int>::iterator it;
+//    for(it=q.begin();it!=q.end();it++)
+//    {
+//        cout<<*it<<" ";
+//    }cout<<endl;
+}
+vector<int> RandNumGenerator::getRandomArrayUnique(int l,int r,int n)
+{
+    vector<int>q;
+    for(int i=l;i<=r;i++)
+    {
+        q.push_back(i);
+    }
+    random_shuffle(q.begin(),q.end());
+    vector<int>temp;
+    n=min(n,r-l+1);
+    for(int i=0;i<n;i++)
+    {
+        temp.push_back(q[i]);
+    }
+    return temp;
+}
+bool RandNumGenerator::test_()
+{
+    //srand(time(NULL));
+    int _l=1,_r=10,_n=5;
+    bool _unique=false;
+    int _endline=5;
+    vector<int>::iterator it;
+    char c;
+    CLS;
+    while(1)
+    {
+        CLS;
+        cout<<"RandNumGenerator__TEST-MODE"<<endl;
+        cout<<"1.Single"<<endl
+            <<"2.Array"<<endl
+            <<"3.Set"<<endl;
+        c=getch();
+        if(c=='1')
+        {
+            cout<<getRandom(_l,_r)<<endl;
+            c=getch();
+            continue;
+        }
+        if(c=='2')
+        {
+            vector<int>ans=getRandomArray(_l,_r,_n,_unique);
+            int _count=0;
+            for(it=ans.begin();it!=ans.end();it++)
+            {
+                cout<<*it<<" ";
+                if(++_count==_endline)
+                {
+                    cout<<endl;
+                    _count-=_endline;
+                }
+            }cout<<endl;
+            c=getch();
+            continue;
+        }
+        if(c=='3')
+        {
+            while(1)
+            {
+                CLS;
+                cout<<"1.Range= [ " <<_l<<" , "<<_r<<" ]"<<endl
+                    <<"2.n= "<<_n<<endl
+                    <<"3._unique= "<<_unique<<endl
+                    <<"4.Exit"<<endl;
+                c=getch();
+                if(c=='1')
+                {
+                    cout<<"Cin:"<<endl;
+                    cin>>_l>>_r;
+                    continue;
+                }
+                if(c=='2')
+                {
+                    cout<<"Cin:"<<endl;
+                    cin>>_n;
+                    continue;
+                }
+                if(c=='3')
+                {
+                    cout<<"Exchange It"<<endl;
+                    c=getch();
+                    _unique=!_unique;
+                    continue;
+                }
+                if(c=='4')
+                {
+                    break;
+                }
+            }
+            continue;
+        }
+    }
+//    int temp=getRandom(l,r);
+//    int num[15];
+//    int t=0;
+//    memset(num,0,sizeof(num));
+//    while(temp<=10 && temp>=1)
+//    {
+//        t++;
+//        cout<<temp<<endl;
+//        num[temp]++;
+//        temp=getRandom(l,r);
+//        //Sleep(50);
+//        if(t>100)break;
+//    }
+//    cout<<"Wrong:"<<endl;
+//    for(int i=1;i<=10;i++)
+//    {
+//        if(!num[i])
+//        {
+//            cout<<i<<endl;
+//        }
+//    }
+}
+
+class Item
+{
+public:
     string name;
-    string description;
-    int consumption;
-    int reward;
-    /*
-        已测试，正常。v0.1
-    */
-
-public:
-    void Set(string namet,string descriptiont,int consumptiont,int rewardt);
-    void Test();
+    string describe;
+    Item():name("NULL"),describe("NULL"){}
+    Item(string _name,string _describe):name(_name),describe(_describe){}
+    void disPlay(int =1);
 };
-
-class Game_Mine
-{
-private:
-    const int event_num=2;
-    Player a;
-    Event q[2];
-    /*
-        已测试，正常。v0.1
-    */
-
-public:
-    void Init();
-    void LoadingAnimation(int times=10,int style=1);
-    void Explore();
-}g;
-
-int main()
-{
-    srand(time(NULL));
-    g.Init();
-    return 0;
-}
-
-void Player::Set(int hpt,int breadt,int emeraldt)
-{
-    this->hp=hpt;
-    this->hp_maximum=20;
-    this->bread=breadt;
-    this->emerald=emeraldt;
-}
-void Player::Gain_Bread(int x)
-{
-    this->bread+=x;
-}
-void Player::Gain_Emerald(int x)
-{
-    this->emerald+x;
-}
-void Player::Gain_Hp(int x)
-{
-    this->hp=(this->hp+x>=this->hp_maximum)?this->hp_maximum:this->hp+x;
-}
-bool Player::Lose_Bread(int x)
-{
-    if(this->bread-x<0)return false;
-    this->bread-=x;
-    return true;
-}
-bool Player::Lose_Emerald(int x)
-{
-    if(this->emerald-x<0)return false;
-    this->emerald-=x;
-    return true;
-}
-bool Player::Lose_Hp(int x)
-{
-    if(this->hp-x<0)return false;
-    this->hp-=x;
-    return true;
-}
-void Player::Test()
-{
-    //cout<<this->hp_maximum<<endl;
-    printf("hp: %d\nbread: %d\nemerald: %d\n",this->hp,this->bread,this->emerald);
-}
-
-void Event::Set(string namet,string descriptiont,int consumptiont,int rewardt)
-{
-    this->name=namet;
-    this->description=descriptiont;
-    this->consumption=consumptiont;
-    this->reward=rewardt;
-}
-void Event::Test()
-{
-    cout<<"name: "<<this->name<<endl;
-    cout<<"describe: "<<this->description<<endl;
-    cout<<"consumption: "<<this->consumption<<endl;
-    cout<<"reward: "<<this->reward<<endl;
-}
-
-void Game_Mine::Init()
-{
-    this->a.Set(20,5,5);
-    //this->a.Test();
-
-    this->q[1].Set("矿洞","危险",1,2);
-    this->q[2].Set("村庄","交易中心",0,0);
-
-    //this->q[1].Test();
-    cout<<"**Mine version 0.11**\n";
-    cout<<"作者 wmsx1\n";
-    cout<<"按任意键继续___";
-    char c=getch();
-}
-void Game_Mine::Explore()
-{
-    int event_id=(rand()%this->event_num)+1;
-    //cout<<event_id;
-    cout<<"你遇到了 "<<this->q[event_id]->name<<endl;
-    cout<<"(探索消耗 "<<this->q[event_id]->bread<<" 个面包)"<<endl;
-    cout<<"要探索吗?"<<endl<<"1/是"<<" "<<"0/否"<<endl;
-
-}
-void Game_Mine::LoadingAnimation(int times,int style)
+void Item::disPlay(int style)
 {
     if(style==1)
     {
-        cout<<"少女祈祷中..."<<endl;
-        Sleep(1000);
-        system("cls");
+        cout<<"『"<<name<<"』"<<endl;
     }
-    if(style==2)
+    else
     {
-        int c=0;
-        for(int i=1;i<=times;i++)
-        {
-            for(int j=1;j<=i-1;j++)cout<<" ";
-            //printf("%c",(c)?'_':'几');
-            if(c==0)
-            {
-                cout<<"几";
-            }
-            else cout<<"__";
-            Sleep(200);
-            system("cls");
-            c^=1;
-        }
+        cout<<"「"<<name<<"」"<<endl;
     }
+}
+
+class GameSourceManager
+{
+private:
+    int round;
+    int day;
+    RandNumGenerator RDG;
+public:
+    GameSourceManager()
+    {
+        init();
+    }
+    vector<Item>arr;
+
+    void init();
+    int getRandom(int,int);
+    int getRandom(int =10);
+    void disPlayAll();
+    void disPlaySingle(int);
+    void startInterface();
+    void mainInterface();
+    void mainLoopVs();
+    void gameLoopCs();
+    friend void printWithDelay();
+    friend void clsAll();
+    friend void color();
+    friend void gotoxy();
+    friend void hideCursor();
+};
+void GameSourceManager::mainInterface()
+{
+    char ope;
+    while(true)
+    {
+        cout<<"1. Start"<<endl
+            <<"2. Option"<<endl
+            <<"3. Exit"<<endl;
+        ope=getch();
+        if(ope=='1')
+        {
+            gameLoopCs();
+        }
+        if(ope=='2')
+        {
+            cout<<"NO"<<endl;
+            Sleep(750);
+        }
+        if(ope=='3')
+        {
+            exit(0);
+        }
+        CLS;
+    }
+
+}
+void GameSourceManager::startInterface()
+{
+    printInCenter("MineTale",50);
+    for(int i=1;i<Lines_y-2;i++)
+    {
+        cout<<endl;
+    }
+    printInCenter("**press any key to continue**");
+    char c=getch();
+    CLS;
+}
+void GameSourceManager::init()
+{
+    SetConsoleTitle("MineTale");
+    system("mode con cols=80 lines=25");
+    srand(time(NULL));
+    hideCursor();
+
+    //arr.push_back(Item{"4k","outlook"});
+}
+int GameSourceManager::getRandom(int l,int r)
+{
+    return RDG.getRandom(l,r);
+}
+int GameSourceManager::getRandom(int n)
+{
+    return RDG.getRandom(n);
+}
+void GameSourceManager::mainLoopVs()
+{
+
+}
+void GameSourceManager::gameLoopCs()
+{
+//    cout<<"DAY [1]"<<endl;
+//    cout<<"Explore"<<endl;
+    CLS;
+    cout<<""<<endl
+        <<""<<endl
+        <<""<<endl
+        <<""<<endl
+        <<""<<endl
+        <<" ________     ________    ____ "<<endl
+        <<"|Explore|    |BackPack|  |Save|"<<endl
+        <<""<<endl;
+    system("Pause");
+
+
+}
+void GameSourceManager::disPlayAll()
+{
+    #if CPP_11
+    for(auto it:arr)
+    {
+        it.disPlay();
+    }
+    #else
+    vector<Item>::iterator it=arr.begin();
+    for(it=arr.begin();it!=arr.end();it++)
+    {
+        it->disPlay();
+    }
+
+    #endif
+}
+void GameSourceManager::disPlaySingle(int pos)
+{
+    arr[pos].disPlay();
+}
+
+class Being
+{
+public:
+    int hp;
+    int ak;
+    Being(){}
+    Being(int _hp,int _ak):hp(_hp),ak(_ak){}
+    //void attack(Being&);
+};
+
+class Player:public Being
+{
+public:
+    string name;
+    Player(int _hp,int _ak,string _name="NULL"):Being(_hp,_ak),name(_name){}
+    void attack(Being&);
+    friend ostream& operator<<(ostream&,Player&);
+};
+void Player::attack(Being& B)
+{
+    B.hp-=(ak*10);
+}
+
+class Beast:public Being
+{
+public:
+    string race;
+    void attack(Player&);
+    Beast(int _hp,int _ak,string _race="Zombies"):Being(_hp,_ak),race(_race){}
+    friend ostream& operator<<(ostream&,Beast&);
+};
+void Beast::attack(Player& B)
+{
+    B.hp-=ak;
+}
+
+class StringBase
+{
+public:
+    string str;
+    StringBase(string _str):str(_str){}
+    friend ostream& operator<<(ostream&,StringBase&);
+};
+
+int main()
+{
+//    GameSourceManager Win;
+//    Win.startInterface();
+//    Win.mainInterface();
+
+//    int tot=0;
+//    while(1)
+//    {
+//        if(KeyDown(VK_UP))
+//        {
+//            tot++;
+//            cout<<tot<<endl;
+//            Sleep(500);
+//        }
+//    }
+
+    StringBase s("123");
+    cout<<s;
+
+//    RandNumGenerator t;
+//    t.test_();
+
+    //t.test_();
+
+//     switch(c)
+//     {
+//     case 72:
+//         cout<<"Up"<<endl;
+//         break;
+//     case 75:
+//         cout<<"Left"<<endl;
+//         break;
+//     case 80:
+//         cout<<"Down"<<endl;
+//         break;
+//     case 77:
+//         cout<<"Right"<<endl;
+//         break;
+//     }
+
+///**Player Demo**
+//    Player m(1,5);
+//    Beast k(5,7);
+//    cout<<m<<endl;
+//    cout<<k<<endl;
+//    m.attack(k);
+//    k.attack(m);
+//    cout<<m<<endl;
+//    cout<<k<<endl;
+
+    return 0;
+}
+
+void gotoxy(int x,int y)
+{
+    handle hout=GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD pos={x,y};
+    SetConsoleCursorPosition(hout,pos);
+    // x-->
+    //y
+    //begin with (0,0)
+}
+void hideCursor()
+{
+    handle hout=GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursor_info={1,0};
+    SetConsoleCursorInfo(hout,&cursor_info);
+}
+void color(int tmp)
+{
+    handle hout=GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hout,tmp);
+    //SetConsoleTextAttribute(hout,FOREGROUND_BLUE|FOREGROUND_GREEN);
+}
+void clsAll()
+{
+    handle hout=GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hout,&csbi);
+    DWORD sizew = csbi.dwSize.X * csbi.dwSize.Y,num = 0;
+    COORD pos={0,0};
+    FillConsoleOutputCharacter(hout,' ',sizew,pos,&num);
+    FillConsoleOutputAttribute(hout,csbi.wAttributes,sizew,pos,&num);
+    SetConsoleCursorPosition(hout, pos);
+}
+void printInCenter(string str,int delay)
+{
+    int len=str.size();
+    int left_size=(Columns_x-len)/2;
+    for(int i=1;i<=left_size;i++)cout<<" ";
+    printWithDelay(str,delay);
+    cout<<endl;
+}
+
+void printWithDelay(string str,int delay)
+{
+    #if CPP_11
+    for(auto it:str)
+    {
+        cout<<it<<" ";
+    }
+    #else
+    for(int i=0;i<str.size();i++)
+    {
+        cout<<str[i];
+        Sleep(delay);
+    }
+    #endif // CPP_11
+}
+
+//void Being::attack(Being& B)
+//{
+//    B.hp-=ak;
+//    if(B.hp<0)B.hp=0;
+//}
+
+ostream& operator<<(ostream& out,Player& tmp)
+{
+    out<<"『"<<tmp.name<<"』"<<endl;
+    out<<"HP:"<<tmp.hp;
+    return out;
+}
+ostream& operator<<(ostream& out,Beast& tmp)
+{
+    out<<"『"<<tmp.race<<"』"<<endl;
+    out<<"HP:"<<tmp.hp;
+    return out;
+}
+
+ostream& operator<<(ostream& out,StringBase& str)
+{
+    out<<"┌────┐"<<endl
+       <<"│ffu     │"<<endl
+       <<"└────╯"<<endl;
+    return out;
 }
