@@ -1,2 +1,4 @@
-# Minecraft-
-以 Minecraft 为基础的文字改版。
+# Minetale
+A game that based on `Minecraft`.
+
+Using Cpp.
