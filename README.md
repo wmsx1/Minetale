@@ -1,4 +1,6 @@
 # Minetale
-A game that based on `Minecraft`.
+A game that gets inspiration from `Minecraft`.
 
-Using Cpp.
+Using Cpp And STL only.
+
+Aimed to create game bit by bit.
